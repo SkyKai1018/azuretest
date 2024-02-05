@@ -10,10 +10,8 @@ ConfigureServices(builder.Services, builder.Configuration);
 
 void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
-    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    var connectionString = configuration.GetConnectionString("GcpConnection");
     var dbPassword = "";
-
-    dbPassword = configuration["DATABASE_PASSWORD"];
 
     dbPassword = configuration["DATABASE_PASSWORD"];
     connectionString += $"Password={dbPassword};";
@@ -22,8 +20,8 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddControllersWithViews();
 
     services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(configuration.GetConnectionString("GcpConnection"),
-    ServerVersion.AutoDetect(configuration.GetConnectionString("GcpConnection"))));
+    options.UseMySql(connectionString,
+    ServerVersion.AutoDetect(connectionString)));
 }
 
 var app = builder.Build();

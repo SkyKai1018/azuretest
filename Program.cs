@@ -1,7 +1,22 @@
+using Microsoft.EntityFrameworkCore;
+using azureTest.Data;
+using Microsoft.AspNetCore.Hosting;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+ConfigureServices(builder.Services, builder.Configuration);
+
+void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+{
+    // Add services to the container.
+    services.AddControllersWithViews();
+
+    services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(configuration.GetConnectionString("GcpConnection"),
+    ServerVersion.AutoDetect(configuration.GetConnectionString("GcpConnection"))));
+}
 
 var app = builder.Build();
 
@@ -25,3 +40,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+

@@ -14,8 +14,8 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddControllersWithViews();
 
     services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(configuration.GetConnectionString("GcpConnection"),
-    ServerVersion.AutoDetect(configuration.GetConnectionString("GcpConnection"))));
+    options.UseMySql(configuration.GetConnectionString("LocalConnection"),
+    ServerVersion.AutoDetect(configuration.GetConnectionString("LocalConnection"))));
 }
 
 var app = builder.Build();

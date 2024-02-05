@@ -1,11 +1,221 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
-    var groupedRecords = ViewData["Data"] as List<azureTest.Models.TradingData>;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-<h1>@groupedRecords.Count</h1>
+<div class="container-fluid">
 
+        <div class="text-light bg-dark">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card text-light bg-dark">
+                        <div class="card-body">
+                            <h5 class="card-title">Stock Chart</h5>
+                            <div class="autocomplete-container">
+                                <input type="text" id="stockInput" value="2330" placeholder="請輸入股票代號..." />
+                                <div id="autocompleteList" class="autocomplete-items"></div>
+                            </div>
+                            <div id="chart" style="width: 100%; height: 600px"></div>
+                        </div>
+                    </div>
+                </div>
+ Strategy Options and Backtest Results 
+<div class="col-md-12">
+                <div class="card text-light bg-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Strategy Options</h5>
+                        <div>
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" name="startDate" value="2020-01-01">
+
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" name="endDate" value="2024-01-01">
+
+                            <label for="specificDay">Specific Day of Month:</label>
+                            <input type="number" id="specificDay" name="specificDay" min="1" max="31" value="1">
+
+                            <button id="calculateBtn">Calculate</button>
+                        </div>
+                        <div id="returnData">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>//lightweight chart
+    const chartOptions = {
+        layout: {
+            background: { color: "#222" },
+            textColor: "#DDD",
+        },
+        grid: {
+            vertLines: { color: "#444" },
+            horzLines: { color: "#444" },
+        },
+    };
+    const chart = LightweightCharts.createChart(
+        document.getElementById("chart"),
+        chartOptions
+    );
+    const candlestickSeries = chart.addCandlestickSeries({
+        upColor: "#26a69a",
+        downColor: "#ef5350",
+        borderVisible: false,
+        wickUpColor: "#26a69a",
+        wickDownColor: "#ef5350",
+    });
+
+    // Setting the border color for the vertical axis
+    chart.priceScale().applyOptions({
+        borderColor: "#71649C",
+    });
+
+    // Setting the border color for the horizontal axis
+    chart.timeScale().applyOptions({
+        borderColor: "#71649C",
+    });
+
+    chart.timeScale().fitContent();
+    //lightweight chart
+
+
+    document.getElementById('calculateBtn').addEventListener('click', getDateAndCalculate);
+    document.getElementById('stockInput').addEventListener('input', GetInputAndPopulate);
+    document.addEventListener('DOMContentLoaded', InitChart);
+
+    function getDateAndCalculate() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const specificDay = document.getElementById('specificDay').value;
+        const sotckId = document.getElementById('stockInput').value;
+
+        FetchCalculateReturn(sotckId, startDate, endDate, 5);
+    }
+
+    function InitChart() {
+        // 獲取輸入的股票代號
+        var stockId = document.getElementById('stockInput').value;
+        fetchStockDataAndUpdateChart(stockId);
+    }
+
+    // Event listener for stock ID input
+    async function GetInputAndPopulate() {
+        const inputValue = this.value;
+        if (!inputValue) {
+            document.getElementById('autocompleteList').innerHTML = '';
+            return;
+        }
+        await populateAutocomplete(inputValue);
+    }
+
+
+
+    // Handle calculate button click
+    async function handleCalculate(event) {
+        event.preventDefault(); // Prevent form submission
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const specificDay = document.getElementById('specificDay').value;
+
+        if (startDate && endDate && specificDay) {
+            await fetchCalculateReturn(startDate, endDate, specificDay);
+        } else {
+            alert('請輸入完整的日期和特定日！');
+        }
+    }
+
+    async function fetchData(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("There was a problem with your fetch operation:", error);
+        }
+    }
+
+    async function fetchStockDataAndUpdateChart(stockId) {
+        const data = await fetchData(`/api/StockData?StockId=${stockId}`);
+        if (data) {
+            updateChart(data);
+        }
+    }
+
+    async function fetchCalculateReturn(startDate, endDate, specificDay) {
+        const data = await fetchData(`/api/StockData/GetCalculateReturn?startDate=${startDate}&endDate=${endDate}&specificDay=${specificDay}`);
+        if (data) {
+            displayReturnData(data);
+        }
+    }
+
+    function displayReturnData(data) {
+        const returnDataElement = document.getElementById('returnData');
+        if (data) {
+            returnDataElement.innerHTML = `
+                        <p>Total Investment: ${data.TotalInvestment.toFixed(2)}</p>
+                        <p>Final Market Value: ${data.FinalMarketValue.toFixed(2)}</p>
+                        <p>Total Return: ${data.TotalReturn.toFixed(2)}</p>
+                        <p>Return Rate: ${data.ReturnRate.toFixed(2)}%</p>
+                        <p>交易天數 : ${data.Days}</p>
+                    `;
+        } else {
+            returnDataElement.innerHTML = '<p>There was a problem fetching the data.</p>';
+        }
+    }
+
+    async function FetchCalculateReturn(stockId, startDate, endDate, specificDayOfWeek) {
+        const data = await fetchData(`/api/StockData/GetCalculateReturn?stockId=${stockId}&startDate=${startDate}&endDate=${endDate}&specificDayOfWeek=${specificDayOfWeek}`);
+        if (data) {
+            displayReturnData(data);
+        }
+    }
+
+    function updateChart(stockData) {
+        const candlestickData = stockData.map((item) => {
+            return {
+                time: item.Date,
+                open: item.OpenPrice,
+                high: item.MaxPrice,
+                low: item.MinPrice,
+                close: item.ClosePrice,
+            };
+        });
+
+        candlestickSeries.setData(candlestickData);
+
+    }
+
+    // Function to populate the autocomplete list with fetched stock symbols
+    async function populateAutocomplete(inputValue) {
+        const list = document.getElementById('autocompleteList');
+        list.innerHTML = '';
+
+        const matchingStocks = await fetchStockSymbols(inputValue);
+
+        matchingStocks.forEach(stock => {
+            const item = document.createElement('DIV');
+            item.textContent = stock;
+            item.addEventListener('click', () => {
+                document.getElementById('stockInput').value = stock;
+                list.innerHTML = '';
+                fetchStockDataAndUpdateChart(stock);
+            });
+            list.appendChild(item);
+        });
+    }
+
+    // Helper function to fetch stock symbols
+    async function fetchStockSymbols(inputValue) {
+        try {
+            const response = await fetch(`/api/StockData/search/${inputValue}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }</script>

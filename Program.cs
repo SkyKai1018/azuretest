@@ -10,6 +10,14 @@ ConfigureServices(builder.Services, builder.Configuration);
 
 void ConfigureServices(IServiceCollection services, IConfiguration configuration)
 {
+    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    var dbPassword = "";
+
+    dbPassword = configuration["DATABASE_PASSWORD"];
+
+    dbPassword = configuration["DATABASE_PASSWORD"];
+    connectionString += $"Password={dbPassword};";
+
     // Add services to the container.
     services.AddControllersWithViews();
 

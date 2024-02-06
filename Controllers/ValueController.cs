@@ -66,7 +66,7 @@ namespace StockBacktesting.Controllers
         [HttpPost("StartBacktest")]
         public async Task<IActionResult> StartBacktest([FromBody] BacktestRequest request)
         {
-            var result = new List<ReturnData>();
+            //var result = new List<ReturnData>();
 
             try
             {
@@ -82,17 +82,17 @@ namespace StockBacktesting.Controllers
                     .Include(s => s.EarningsDistributions.Where(ed => ed.Date >= request.StartDate && ed.Date <= request.EndDate))
                     .ToList();
 
-                foreach (var stockMatch in stocks)
-                {
-                    var filteredRecords = stockMatch.TradingDatas.ToList();
-                    result.Add(CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay));
-                }
-
-                // var result = stocks.AsParallel().Select(stockMatch =>
+                //foreach (var stockMatch in stocks)
                 //{
                 //    var filteredRecords = stockMatch.TradingDatas.ToList();
-                //    return CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay);
-                //}).ToList();
+                //    result.Add(CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay));
+                //}
+
+                var result = stocks.AsParallel().Select(stockMatch =>
+               {
+                   var filteredRecords = stockMatch.TradingDatas.ToList();
+                   return CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay);
+               }).ToList();
 
                 var json = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
                 return Ok(json);

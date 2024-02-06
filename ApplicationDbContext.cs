@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using azureTest.Models;
+using azuretest.Models;
 
-namespace azureTest.Data
+namespace azuretest.Data
 {
     public class ApplicationDbContext : DbContext
     {

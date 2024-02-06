@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using azureTest.Data;
-using Microsoft.AspNetCore.Hosting;
+using azuretest.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

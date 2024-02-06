@@ -3,8 +3,8 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using azureTest.Data;
-using azureTest.Models;
+using azuretest.Data;
+using azuretest.Models;
 
 namespace StockBacktesting.Controllers
 {

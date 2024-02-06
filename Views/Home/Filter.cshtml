@@ -1,0 +1,163 @@
+﻿@{
+    var groupedRecords = ViewData["GroupedRecords"] as List<azuretest.Models.Stock>;
+    var second = ViewData["second"] as double?;
+}
+@model List<azuretest.Models.Filter>
+
+<div class="row">
+    <div class="col-7 border">
+        <form id="stockPriceForm" asp-action="AddStockPriceFilter" method="post">
+            <div>
+                <label for="stockPrice">最新股價</label>
+                <select name="ComparisonOperators" id="stockPrice">
+                    <option value="GreaterThan">&gt;</option>
+                    <option value="LessThan">&lt;</option>
+                    <option value="GreaterThanOrEqualTo">&ge;</option>
+                    <option value="LessThanOrEqualTo">&le;</option>
+                    <option value="EqualTo">=</option>
+                </select>
+                <input type="number" id="stockPriceComparison" name="Price">
+                <button type="submit" class="btn btn-primary">加入</button>
+            </div>
+        </form>
+        <br />
+        <form id="raiseFilterForm" asp-action="AddRaiseFilter" method="post">
+            <div>
+                <label for="RiseFilterDay">已連續上漲</label>
+                <input type="number" id="RiseFilterDay" name="Days">
+                <label for="RiseFilterDay">天</label>
+                <button type="submit" class="btn btn-primary">加入</button>
+            </div>
+        </form>
+        <br />
+        <form id="fallFilterForm" asp-action="AddFallFilter" method="post">
+            <div>
+                <label for="FallFilterDay">已連續下跌</label>
+                <input type="number" id="FallFilterDay" name="Days">
+                <label for="FallFilterDay">天</label>
+                <button type="submit" class="btn btn-primary">加入</button>
+            </div>
+        </form>
+        <br />
+        <form id="DaysChangeFilterForm" asp-action="AddDaysChangeFilter" method="post">
+            <div>
+                <label for="AddDaysChangeFilter">最近</label>
+                <input type="number" id="AddDaysChangeFilter" name="Days">
+                <label for="AddDaysChangeFilter">天漲跌幅</label>
+                <input type="number" id="Min" name="Min">
+                <label>% ~ </label>
+                <input type="number" id="Max" name="Max">
+                <label>%</label>
+                <button type="submit" class="btn btn-primary">加入</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-5  border">
+        <table class="table">
+            <tr>
+                <td scope="col">篩選方式</td>
+                <td scope="col">符合筆數</td>
+                <td scope="col">操作</td>
+            </tr>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@Model[i].GetDescription()</td>
+                    <td>@(Model[i].result == null ? "--" : Model[i].result)</td>
+                    <td>
+                        <form asp-action="DeleteFilterStrategy" asp-route-id="@i" method="post">
+                            <input type="hidden" name="_method" value="DELETE" />
+                            <button type="submit" class="btn btn-danger">删除</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </table>
+        <form asp-action="StartFilter" method="post">
+            <input type="submit" value="開始篩選">
+        </form>
+    </div>
+</div>
+<br>
+
+<h1>篩選結果</h1>
+@if (groupedRecords != null && groupedRecords.Count > 0)
+{
+    <h3>@groupedRecords.First().TradingDatas.First().Date 資料</h3>
+    <p>@groupedRecords.Count 家符合篩選</p>
+    @if (@second != null)
+    {
+        <p>花費 @second 秒</p>
+    }
+    <table class="table">
+        <thead>
+            <tr>
+                @foreach (var property in groupedRecords.First().TradingDatas.First().GetType().GetProperties())
+                {
+                    if (property.Name != "Stock" && property.Name != "Date" && property.Name != "TradeId")
+                    {
+                        <td scope="col">
+                            @property.Name
+                        </td>
+                    }
+                }
+            </tr>
+            @foreach (var tradingData in groupedRecords)
+            {
+                <tr>
+                    @foreach (var property in tradingData.TradingDatas.First().GetType().GetProperties())
+                    {
+                        if (property.Name != "Stock" && property.Name != "Date" && property.Name != "TradeId")
+                        {
+                            <td scope="col">
+                                @property.GetValue(tradingData.TradingDatas.LastOrDefault(), null)
+                                @if (property.Name == "StockId")
+                                {
+                                    @tradingData.StockName
+                                }
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+        </thead>
+    </table>
+}
+<script>document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('stockPriceForm').addEventListener('submit', function (e) {
+            var priceInput = document.getElementById('stockPriceComparison');
+            if (!priceInput.value.trim()) {
+                e.preventDefault();
+                alert('請輸入股價。');
+            }
+        });
+
+        document.getElementById('raiseFilterForm').addEventListener('submit', function (e) {
+            var daysInput = document.getElementById('RiseFilterDay');
+            if (!daysInput.value.trim()) {
+                e.preventDefault();
+                alert('請輸入天數。');
+            }
+        });
+
+        document.getElementById('fallFilterForm').addEventListener('submit', function (e) {
+            var daysInput = document.getElementById('FallFilterDay');
+            if (!daysInput.value.trim()) {
+                e.preventDefault();
+                alert('請輸入天數。');
+            }
+        });
+
+        document.getElementById('DaysChangeFilterForm').addEventListener('submit', function (e) {
+            var daysInput = document.getElementById('AddDaysChangeFilter');
+            var MinsInput = document.getElementById('Min');
+            var MaxInput = document.getElementById('Max');
+
+            if (!daysInput.value.trim() || !MinsInput.value.trim() || !MaxInput.value.trim()) {
+                e.preventDefault();
+                alert('請輸入條件。');
+            }
+        });
+
+        // 为其他表单添加类似的检查...
+    });</script>

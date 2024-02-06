@@ -1,21 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System;
 
-namespace azureTest.Models
+namespace azuretest.Models;
+
+public class Stock : IIdentifiable
 {
-    public class Stock : IIdentifiable
-    {
-        [Key]
-        public int StockId { get; set; }
-        public string StockName { get; set; }
+    [Key]
+    public int StockId { get; set; }
+    public string StockName { get; set; }
 
-        // Navigation properties
-        public ICollection<TradingData> TradingDatas { get; set; }
-        public ICollection<EarningsDistribution> EarningsDistributions { get; set; }
+    // Navigation properties
+    public ICollection<TradingData> TradingDatas { get; set; }
+    public ICollection<EarningsDistribution> EarningsDistributions { get; set; }
 
-        public int GetId() => this.StockId;
-        public string GetIdentificationInfo() => $"Stock: {this.StockName}";
-    }
-
+    public int GetId() => this.StockId;
+    public string GetIdentificationInfo() => $"Stock: {this.StockName}";
 }
 

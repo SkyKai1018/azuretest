@@ -1,0 +1,112 @@
+﻿<div class="col-md-12">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Strategy Options</h5>
+            <div>
+                <label for="stockId1">Stock ID 1:</label>
+                <input type="text" id="stockId1" name="stockId1">
+
+                <label for="stockId2">Stock ID 2:</label>
+                <input type="text" id="stockId2" name="stockId2">
+
+                <label for="stockId3">Stock ID 3:</label>
+                <input type="text" id="stockId3" name="stockId3">
+
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" name="startDate" value="2020-01-01">
+
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" name="endDate" value="2024-01-01">
+
+                <label for="specificDay">Specific Day of Month:</label>
+                <input type="number" id="specificDay" name="specificDay" min="1" max="31" value="1">
+
+                <button id="calculateBtn" onclick="calculate()">Calculate</button>
+            </div>
+            <div id="returnData">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+</div>
+<script>function calculate() {
+        // 获取用户输入
+        var stockId1 = document.getElementById('stockId1').value;
+        var stockId2 = document.getElementById('stockId2').value;
+        var stockId3 = document.getElementById('stockId3').value;
+        var startDate = document.getElementById('startDate').value;
+        var endDate = document.getElementById('endDate').value;
+        var specificDay = document.getElementById('specificDay').value;
+
+        // 构建请求数据
+        var data = {
+            stockIds: [stockId1, stockId2, stockId3], // Create an array of stock IDs
+            startDate: startDate,
+            endDate: endDate,
+            specificDay: specificDay
+        };
+
+        // 发送数据到服务器...
+        // 根据你的实际后端URL和逻辑进行调整
+        fetch('/api/StockData/StartBacktest', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 处理回测结果
+                console.log('Success:', data);
+                var returnDataDiv = document.getElementById('returnData');
+                if (data && data.length > 0) {
+                    var tableHTML = `<table class="table">
+                        <thead>
+                            <tr>
+                                <th>股票代號</th>
+                                <th>Total Investment</th>
+                                <th>Final Market Value</th>
+                                <th>Total Return</th>
+                                <th>Return Rate</th>
+                                <th>交易天数</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+
+                    data.forEach(item => {
+                        tableHTML += `<tr>
+                        <td>${item.StockId}</td>
+                        <td>${item.TotalInvestment.toFixed(2)}</td>
+                        <td>${item.FinalMarketValue.toFixed(2)}</td>
+                        <td>${item.TotalReturn.toFixed(2)}</td>
+                        <td>${item.ReturnRate.toFixed(2)}%</td>
+                        <td>${item.Days}</td>
+                    </tr>`;
+                    });
+
+                    tableHTML += `</tbody></table>`;
+                    returnDataDiv.innerHTML = tableHTML;
+                } else {
+                    returnDataDiv.innerHTML = '<p>No data to display.</p>';
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+
+    function displayReturnData(data) {
+        const returnDataElement = document.getElementById('returnData');
+        if (data) {
+            returnDataElement.innerHTML = `
+                            <p>Total Investment: ${data.TotalInvestment.toFixed(2)}</p>
+                            <p>Final Market Value: ${data.FinalMarketValue.toFixed(2)}</p>
+                            <p>Total Return: ${data.TotalReturn.toFixed(2)}</p>
+                            <p>Return Rate: ${data.ReturnRate.toFixed(2)}%</p>
+                            <p>交易天數 : ${data.Days}</p>
+                        `;
+        } else {
+            returnDataElement.innerHTML = '<p>There was a problem fetching the data.</p>';
+        }
+    }</script>

@@ -47,7 +47,7 @@ public class HomeController : Controller
         return View(new List<Filter>());
     }
 
-    public IActionResult Privacy()
+    public IActionResult BackTest()
     {
         return View();
     }

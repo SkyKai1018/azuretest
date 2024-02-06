@@ -129,34 +129,42 @@ public class HomeController : Controller
     {
         Stopwatch stopwatch = Stopwatch.StartNew();
 
-        var TradingDatas = _context.TradingDatas
-        .Include(td => td.Stock) // 包括关联的Stock
-        .ToList(); // 把数据取出到内存中
+        // 一次性加载所有需要的数据
+        var tradingDatas = _context.TradingDatas
+            .Include(td => td.Stock)
+            .ToList();
 
-        _context.EarningsDistributions
-        .Include(td => td.Stock) // 包括关联的Stock
-        .ToList();
+        var earningsDistributions = _context.EarningsDistributions
+            .Include(ed => ed.Stock)
+            .ToList();
 
-        var OutPut = new List<IIdentifiable>();
-        //計算每個篩選符合的家數
+        var output = new List<IIdentifiable>();
+
+        // 使用HashSet提高性能
+        HashSet<int> stockIds = new HashSet<int>();
+
+        // 避免重复的数据库操作
         foreach (var item in DataStorage.Filters)
         {
-            if (OutPut.Count == 0) OutPut = item.Execute(TradingDatas);
+            if (output.Count == 0)
+            {
+                output = item.Execute(tradingDatas);
+                //stockIds = new HashSet<int>(output.Cast<Stock>().Select(s => s.StockId));
+            }
             else
             {
-                var stockIds = OutPut.Cast<Stock>().Select(s => s.StockId).ToList(); // 从stocks集合中提取所有的StockId
-
-                var FilterData = TradingDatas
-                    .Where(td => stockIds.Contains(td.StockId)) // 只选择those在stockIds集合中的TradingDatas
-                    .OrderBy(td => td.StockId).ThenBy(td => td.Date) // 按StockId和Date排序
-                    .ToList(); // 把数据取出到内存中
-                OutPut = item.Execute(FilterData);
+                var filterData = tradingDatas
+                    .Where(td => stockIds.Contains(td.StockId))
+                    .ToList();
+                output = item.Execute(filterData);
             }
-            item.result = item.Execute(_context.TradingDatas.ToList()).Count;
+            // 更新stockIds
+            stockIds = new HashSet<int>(output.Cast<Stock>().Select(s => s.StockId));
+            item.result = item.Execute(tradingDatas).Count;
         }
 
         stopwatch.Stop();
-        ViewData["GroupedRecords"] = OutPut.Cast<Stock>().ToList();
+        ViewData["GroupedRecords"] = output.Cast<Stock>().ToList();
         ViewData["second"] = stopwatch.Elapsed.TotalSeconds;
 
         return View("Filter", DataStorage.Filters);

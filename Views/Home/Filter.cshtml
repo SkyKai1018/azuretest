@@ -83,7 +83,7 @@
 <h1>篩選結果</h1>
 @if (groupedRecords != null && groupedRecords.Count > 0)
 {
-    <h3>@groupedRecords.First().TradingDatas.First().Date 資料</h3>
+    <h3>@groupedRecords.Last().TradingDatas.Last().Date 資料</h3>
     <p>@groupedRecords.Count 家符合篩選</p>
     @if (@second != null)
     {
@@ -92,7 +92,7 @@
     <table class="table">
         <thead>
             <tr>
-                @foreach (var property in groupedRecords.First().TradingDatas.First().GetType().GetProperties())
+                @foreach (var property in groupedRecords.Last().TradingDatas.Last().GetType().GetProperties())
                 {
                     if (property.Name != "Stock" && property.Name != "Date" && property.Name != "TradeId")
                     {
@@ -105,7 +105,7 @@
             @foreach (var tradingData in groupedRecords)
             {
                 <tr>
-                    @foreach (var property in tradingData.TradingDatas.First().GetType().GetProperties())
+                    @foreach (var property in tradingData.TradingDatas.Last().GetType().GetProperties())
                     {
                         if (property.Name != "Stock" && property.Name != "Date" && property.Name != "TradeId")
                         {

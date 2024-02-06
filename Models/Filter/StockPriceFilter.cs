@@ -21,8 +21,7 @@ public class StockPriceFilter : Filter
     {
         var latestTradingDataPerStock = tradingDatas
             .GroupBy(td => td.StockId)
-            .Select(g => g.OrderByDescending(td => td.Date).FirstOrDefault())
-            .ToList();
+            .Select(g => g.MaxBy(td => td.Date)); // 使用 MaxBy 获取最新的交易数据            .ToList();
 
         Func<TradingData, bool> predicate = td => td != null && GetPredicate(td.ClosePrice);
 

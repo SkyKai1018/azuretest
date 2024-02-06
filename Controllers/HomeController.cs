@@ -4,6 +4,7 @@ using azuretest.Data;
 using Microsoft.EntityFrameworkCore;
 using azuretest.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Collections.Concurrent;
 
 namespace azuretest.Controllers;
 
@@ -139,6 +140,7 @@ public class HomeController : Controller
             .ToList();
 
         var output = new List<IIdentifiable>();
+        //var output = new ConcurrentBag<IIdentifiable>();  // 使用线程安全的集合
 
         // 使用HashSet提高性能
         HashSet<int> stockIds = new HashSet<int>();
@@ -149,7 +151,6 @@ public class HomeController : Controller
             if (output.Count == 0)
             {
                 output = item.Execute(tradingDatas);
-                //stockIds = new HashSet<int>(output.Cast<Stock>().Select(s => s.StockId));
             }
             else
             {

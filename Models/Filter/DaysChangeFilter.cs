@@ -1,4 +1,6 @@
-﻿namespace azuretest.Models;
+﻿using System.Collections.Concurrent;
+
+namespace azuretest.Models;
 
 public class DaysChangeFilter : Filter
 {
@@ -19,23 +21,45 @@ public class DaysChangeFilter : Filter
         return string.Concat("近", Days, "天漲幅在", Min, "% ~ ", Max, "%之間");
     }
 
+    //public override List<IIdentifiable> Execute(List<TradingData> tradingDatas)
+    //{
+    //    List<IIdentifiable> stocks = new List<IIdentifiable>();
+
+    //    foreach (var group in tradingDatas.GroupBy(td => td.StockId))
+    //    {
+    //        var dataOrderByDate = group.OrderByDescending(r => r.Date);
+    //        var first = dataOrderByDate.FirstOrDefault();
+    //        var day = dataOrderByDate.ElementAtOrDefault(Days);
+    //        var priceChangeRate = 100 * (first.ClosePrice - day.ClosePrice) / day.ClosePrice;
+
+    //        if (priceChangeRate < Max && priceChangeRate > Min)
+    //        {
+    //            stocks.Add(first.Stock);
+    //        }
+    //    }
+
+    //    return stocks;
+    //}
+
     public override List<IIdentifiable> Execute(List<TradingData> tradingDatas)
     {
-        List<IIdentifiable> stocks = new List<IIdentifiable>();
+        ConcurrentBag<IIdentifiable> stocks = new ConcurrentBag<IIdentifiable>();
 
-        foreach (var group in tradingDatas.GroupBy(td => td.StockId))
+        Parallel.ForEach(tradingDatas.GroupBy(td => td.StockId), (group) =>
         {
-            var dataOrderByDate = group.OrderByDescending(r => r.Date);
+            var dataOrderByDate = group.OrderByDescending(r => r.Date).ToList();
             var first = dataOrderByDate.FirstOrDefault();
             var day = dataOrderByDate.ElementAtOrDefault(Days);
-            var priceChangeRate = 100 * (first.ClosePrice - day.ClosePrice) / day.ClosePrice;
-
-            if (priceChangeRate < Max && priceChangeRate > Min)
+            if (first != null && day != null)
             {
-                stocks.Add(first.Stock);
+                var priceChangeRate = 100 * (first.ClosePrice - day.ClosePrice) / day.ClosePrice;
+                if (priceChangeRate < Max && priceChangeRate > Min)
+                {
+                    stocks.Add(first.Stock);
+                }
             }
-        }
+        });
 
-        return stocks;
+        return stocks.ToList();
     }
 }

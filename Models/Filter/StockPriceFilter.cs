@@ -17,15 +17,35 @@ public class StockPriceFilter : Filter
         return string.Format("最新股價 {0} {1}", ComparisonOperators.ToSymbol(), Price.ToString());
     }
 
+    //public override List<IIdentifiable> Execute(List<TradingData> tradingDatas)
+    //{
+    //    var latestTradingDataPerStock = tradingDatas
+    //        .GroupBy(td => td.StockId)
+    //        .Select(g => g.MaxBy(td => td.Date)); // 使用 MaxBy 获取最新的交易数据            .ToList();
+
+    //    Func<TradingData, bool> predicate = td => td != null && GetPredicate(td.ClosePrice);
+
+    //    var filteredStocks = latestTradingDataPerStock
+    //        .Where(predicate)
+    //        .Select(td => td.Stock)
+    //        .Cast<IIdentifiable>()
+    //        .ToList();
+
+    //    return filteredStocks;
+    //}
+
     public override List<IIdentifiable> Execute(List<TradingData> tradingDatas)
     {
         var latestTradingDataPerStock = tradingDatas
+            .AsParallel()  // 将查询并行化
             .GroupBy(td => td.StockId)
-            .Select(g => g.MaxBy(td => td.Date)); // 使用 MaxBy 获取最新的交易数据            .ToList();
+            .Select(g => g.MaxBy(td => td.Date)) // 使用 MaxBy 获取最新的交易数据
+            .ToList();
 
         Func<TradingData, bool> predicate = td => td != null && GetPredicate(td.ClosePrice);
 
         var filteredStocks = latestTradingDataPerStock
+            .AsParallel()  // 再次将查询并行化
             .Where(predicate)
             .Select(td => td.Stock)
             .Cast<IIdentifiable>()

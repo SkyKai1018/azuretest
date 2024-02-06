@@ -30,6 +30,7 @@
     </div>
 </div>
 <script>function calculate() {
+    const startTime = performance.now();
         // 获取用户输入
         var stockId1 = document.getElementById('stockId1').value;
         var stockId2 = document.getElementById('stockId2').value;
@@ -45,6 +46,7 @@
             endDate: endDate,
             specificDay: specificDay
         };
+    
 
         // 发送数据到服务器...
         // 根据你的实际后端URL和逻辑进行调整
@@ -90,6 +92,8 @@
                 } else {
                     returnDataDiv.innerHTML = '<p>No data to display.</p>';
                 }
+                const seconds = (performance.now() - startTime) / 1000;
+                console.log(`请求处理共耗时: ${seconds}秒`);
             })
             .catch((error) => {
                 console.error('Error:', error);

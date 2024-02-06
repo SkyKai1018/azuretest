@@ -1,8 +1,6 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using azuretest.Data;
 using azuretest.Models;
 
@@ -68,32 +66,33 @@ namespace StockBacktesting.Controllers
         [HttpPost("StartBacktest")]
         public async Task<IActionResult> StartBacktest([FromBody] BacktestRequest request)
         {
-            var result = new List<ReturnData>();
+            //var result = new List<ReturnData>();
+
             try
             {
-                foreach (var item in request.StockIds)
+                var stockIdSet = new HashSet<int>(request.StockIds.Select(item =>
                 {
-                    if (!int.TryParse(item, out int stockId)) continue;
+                    if (int.TryParse(item, out int stockId)) return stockId;
+                    return -1; // 返回一个无效的股票ID，稍后会被过滤掉
+                }));
 
-                    Stopwatch stopwatch = Stopwatch.StartNew();
+                var stocks = _context.Stocks
+                    .Where(s => stockIdSet.Contains(s.StockId))
+                    .Include(s => s.TradingDatas.Where(td => td.Date >= request.StartDate && td.Date <= request.EndDate))
+                    .Include(s => s.EarningsDistributions.Where(ed => ed.Date >= request.StartDate && ed.Date <= request.EndDate))
+                    .ToList();
 
-                    // 获取匹配的股票，并包括过滤后的TradingDatas和EarningsDistributions
-                    var stockMatch = _context.Stocks
-                        .Where(s => s.StockId == stockId)
-                        .Include(s => s.TradingDatas.Where(td => td.Date >= request.StartDate && td.Date <= request.EndDate))
-                        .Include(s => s.EarningsDistributions.Where(ed => ed.Date >= request.StartDate && ed.Date <= request.EndDate))
-                        .FirstOrDefault();
+                //foreach (var stockMatch in stocks)
+                //{
+                //    var filteredRecords = stockMatch.TradingDatas.ToList();
+                //    result.Add(CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay));
+                //}
 
-                    stopwatch.Stop();
-                    Console.WriteLine(stopwatch.Elapsed.TotalSeconds);
-
-                    if (stockMatch == null) continue;
-
-                    var filteredRecords = stockMatch.TradingDatas
-                        .ToList();
-
-                    result.Add(CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay));
-                }
+                var result = stocks.AsParallel().Select(stockMatch =>
+               {
+                   var filteredRecords = stockMatch.TradingDatas.ToList();
+                   return CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay);
+               }).ToList();
 
                 var json = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true });
                 return Ok(json);

@@ -1,5 +1,6 @@
 # 股票分析與回測網頁應用
 **Demo**: https://azuretestmvc.azurewebsites.net/Home/BackTest
+
 這款網頁應用是一個全面的股票分析與回測平台，使用.Net Core 7 MVC建立。
 它透過Entity Framework Core (EF Core) 與MySQL資料庫整合，有效地查詢和管理股票資料。
 此應用提供了強大的功能，用於根據各種條件過濾股票，並進行多只股票的回測，以評估過去的表現和回報。

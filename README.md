@@ -2,8 +2,11 @@
 **Demo**: https://azuretestmvc.azurewebsites.net/Home/BackTest
 
 這款網頁應用是一個全面的股票分析與回測平台，使用.Net Core 7 MVC建立。
+
 它透過Entity Framework Core (EF Core) 與MySQL資料庫整合，有效地查詢和管理股票資料。
+
 此應用提供了強大的功能，用於根據各種條件過濾股票，並進行多只股票的回測，以評估過去的表現和回報。
+
 應用部署在Azure Web Services上，並利用Google Cloud MySQL，展示了在雲端部署、CI/CD流程以及網頁開發技能的熟練度。
 
 **備註** : 由於此專案用於練習用途，股票資料只抓取台股市值前50大及部分ETF資料，資料區間為2010/01/01~2024/01/25。

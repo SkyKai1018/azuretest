@@ -23,6 +23,13 @@
 
 ## 開始使用
 **Demo**: https://azuretestmvc.azurewebsites.net/Home/
+### 個股每日線圖
+![image](https://github.com/SkyKai1018/azuretest/assets/135136212/1b48a3ad-e3c4-4c54-bd5c-f317642daca9)
+### 個股篩選
+![image](https://github.com/SkyKai1018/azuretest/assets/135136212/a032fb11-d477-4356-a673-3bd2c545fd07)
+### 回測功能
+![image](https://github.com/SkyKai1018/azuretest/assets/135136212/39332c48-bdcd-4c26-9e45-bafdddf2bebc)
+
 ### 使用教學
 1. **HomePage**: 進入輸入欄位輸入股票代號，系統先找尋資料庫中符合的資料並顯示選項，當選擇股票後，會在下方圖表顯示該檔股票的每日線圖。
 2. **股票篩選**: 使用者於左側篩選策略設定條件，按下加入會在右方顯示，可同時加入多個篩選策略，當按下開始篩選按鈕時，系統會將符合所有篩選條件的資料顯示在下方圖表。

@@ -1,5 +1,5 @@
 # 股票分析與回測網頁應用
-**Demo**: https://azuretestmvc.azurewebsites.net/Home/BackTest
+**Demo**: https://azuretestmvc.azurewebsites.net/Home/
 
 這款網頁應用是一個全面的股票分析與回測平台，使用.Net Core 7 MVC建立。
 
@@ -22,7 +22,7 @@
 - **部署**: 使用Azure Web Services托管網頁應用，整合CI/CD管道進行自動部署和更新。
 
 ## 開始使用
-**Demo**: https://azuretestmvc.azurewebsites.net/Home/BackTest
+**Demo**: https://azuretestmvc.azurewebsites.net/Home/
 ### 使用教學
 1. **HomePage**: 進入輸入欄位輸入股票代號，系統先找尋資料庫中符合的資料並顯示選項，當選擇股票後，會在下方圖表顯示該檔股票的每日線圖。
 2. **股票篩選**: 使用者於左側篩選策略設定條件，按下加入會在右方顯示，可同時加入多個篩選策略，當按下開始篩選按鈕時，系統會將符合所有篩選條件的資料顯示在下方圖表。

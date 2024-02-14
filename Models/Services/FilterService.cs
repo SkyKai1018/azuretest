@@ -12,15 +12,8 @@ public class FilterService : IFilterService
         _context = context;
     }
 
-    public void AddFilter(Filter filter)
+    public List<Stock> StartFilter(List<Filter> filters)
     {
-        DataStorage.Filters.Add(filter);
-    }
-
-    public List<Stock> StartFilter()
-    {
-        Stopwatch stopwatch = Stopwatch.StartNew();
-
         // 一次性加载所有需要的数据
         var tradingDatas = _context.TradingDatas
             .Include(td => td.Stock)
@@ -36,7 +29,7 @@ public class FilterService : IFilterService
         HashSet<int> stockIds = new HashSet<int>();
 
         // 避免重复的数据库操作
-        foreach (var item in DataStorage.Filters)
+        foreach (var item in filters)
         {
             if (output.Count == 0)
             {
@@ -54,13 +47,6 @@ public class FilterService : IFilterService
             item.result = item.Execute(tradingDatas).Count;
         }
 
-        stopwatch.Stop();
-
         return output.Cast<Stock>().ToList();
-    }
-
-    public void DeleteFilterStrategy(int id)
-    {
-        DataStorage.Filters.Remove(DataStorage.Filters[id]);
     }
 }

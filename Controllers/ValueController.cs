@@ -155,9 +155,7 @@ namespace StockBacktesting.Controllers
                 Console.Write(ex.ToString());
                 return null;
             }
-
         }
-
 
         ReturnData CalculateReturnByDaily(List<TradingData> data)
         {

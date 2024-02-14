@@ -17,12 +17,14 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
 
     // Add services to the container.
     services.AddControllersWithViews();
+    services.AddHttpContextAccessor();
 
     services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString,
     ServerVersion.AutoDetect(connectionString)));
 
     services.AddScoped<IFilterService, FilterService>();
+    services.AddScoped<ICookieService, CookieService>();
 }
 
 var app = builder.Build();

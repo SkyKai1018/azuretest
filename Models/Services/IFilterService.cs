@@ -2,7 +2,5 @@
 
 public interface IFilterService
 {
-    void AddFilter(Filter filter);
-    List<Stock> StartFilter();
-    void DeleteFilterStrategy(int id);
+    List<Stock> StartFilter(List<Filter> filters);
 }

@@ -21,6 +21,8 @@ void ConfigureServices(IServiceCollection services, IConfiguration configuration
     services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString,
     ServerVersion.AutoDetect(connectionString)));
+
+    services.AddScoped<IFilterService, FilterService>();
 }
 
 var app = builder.Build();

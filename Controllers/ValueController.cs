@@ -32,7 +32,6 @@ namespace StockBacktesting.Controllers
         [HttpGet("search/{query}")]
         public IActionResult SearchStocks(string query)
         {
-            //var matchedStocks = csv.Select(record => record.StockId).Distinct().ToList().Where(s => s.StartsWith(query)).ToList();
             var matchedStocks = _context.TradingDatas.Select(record => record.StockId.ToString()).Distinct().ToList().Where(s => s.StartsWith(query)).ToList();
 
 
@@ -66,29 +65,21 @@ namespace StockBacktesting.Controllers
         [HttpPost("StartBacktest")]
         public async Task<IActionResult> StartBacktest([FromBody] BacktestRequest request)
         {
-            //var result = new List<ReturnData>();
-
             try
             {
-                var stockIdSet = new HashSet<int>(request.StockIds.Select(item =>
-                {
+               var stockIdSet = new HashSet<int>(request.StockIds.Select(item =>
+               {
                     if (int.TryParse(item, out int stockId)) return stockId;
                     return -1; // 返回一个无效的股票ID，稍后会被过滤掉
-                }));
+               }));
 
-                var stocks = _context.Stocks
+               var stocks = _context.Stocks
                     .Where(s => stockIdSet.Contains(s.StockId))
                     .Include(s => s.TradingDatas.Where(td => td.Date >= request.StartDate && td.Date <= request.EndDate))
                     .Include(s => s.EarningsDistributions.Where(ed => ed.Date >= request.StartDate && ed.Date <= request.EndDate))
                     .ToList();
 
-                //foreach (var stockMatch in stocks)
-                //{
-                //    var filteredRecords = stockMatch.TradingDatas.ToList();
-                //    result.Add(CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay));
-                //}
-
-                var result = stocks.AsParallel().Select(stockMatch =>
+               var result = stocks.AsParallel().Select(stockMatch =>
                {
                    var filteredRecords = stockMatch.TradingDatas.ToList();
                    return CalculateReturnBySpecificDayOfMonth(filteredRecords, request.SpecificDay);
